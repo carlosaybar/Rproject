@@ -41,10 +41,15 @@ In the graph below we tested the accuraccy of our model by trying to predict the
 **The libraries and packages that we had to install in order to properly analyze the data were:**
 
 Install.packages party
+
 library(tidyverse)
+
 library(party)
+
 install.packages("knitr")
+
 install.packages("rmarkdown")
+
 install.packages("forecast")
 
 ## How to use?
