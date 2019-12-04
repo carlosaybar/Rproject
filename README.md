@@ -16,11 +16,6 @@ Rstudio
 
 **Below we have included a couple graphs with an explanation of what the graph means, the reasoning behind each one of these graphs lead to our CONCLUSION:**
 
-
-
-
-
-
 This is a scatterplot of the annual rainfall in Orissa over the alst 100 years. First we took a look at our dataset and determined that the months with the most rainfall are March through September. As we can see in the picture, there is not really a pattern, but the more rainfall Orissa got in may and march, the more it rainned in June, July, and September.
 
 ![LINEAR REGRESSION](https://user-images.githubusercontent.com/58013489/70103649-b545f900-1609-11ea-8c8b-7933359b3938.png)
@@ -30,29 +25,26 @@ In the graph below we tested the accuraccy of our model by trying to predict the
 ![predict](https://user-images.githubusercontent.com/58013489/70103397-0e615d00-1609-11ea-9301-829e9c5eeb8e.png)
 
 
- The image below graphs the annual rainfall in orissa for the past 15 years. As we can see, the year with the highest annual rainfall was 2010 and the year with the lowest was ....... both of these extreme are bad for agriculture, the best year was.... because the rainfall was neither too high nor too low.
+The image below graphs the annual rainfall in orissa for the past 15 years. As we can see, the year with the highest annual rainfall was 2010 and the year with the lowest was 2006, both of these extreme are bad for agriculture, the best year was from 2011-2014 because the rainfall was neither too high nor too low.
  
- 
- 
- 
- 
+ ![timeseries](https://user-images.githubusercontent.com/58013489/70103400-0ef9f380-1609-11ea-9fe9-a214330995de.png)
  
  
 ## Installation
 
 **The libraries and packages that we had to install in order to properly analyze the data were:**
 
-Install.packages party
+* Install.packages party
 
-library(tidyverse)
+* library(tidyverse)
 
-library(party)
+* library(party)
 
-install.packages("knitr")
+* install.packages("knitr")
 
-install.packages("rmarkdown")
+* install.packages("rmarkdown")
 
-install.packages("forecast")
+* install.packages("forecast")
 
 ## How to use?
 
@@ -63,9 +55,10 @@ First you need to open the html, if you want to compile the project yourself in 
 Insert pictures with examples
 
 ## Credits
- https://gluonhq.com/products/javafx/
-https://docs.oracle.com/javase/tutorial/uiswing/layout/grid.html
-Classroom textbook and previous codes
+
+* rainfall data for Kerela
+* rainfall data for Orissa
+* Classroom textbook and previous codes
 License
 STU © Carlos Aybar De Los Santos , Biao Chen, and Aarmando MGhee
 
