@@ -30,6 +30,8 @@ In the graph below we tested the accuraccy of our model by trying to predict the
 ![predict](https://user-images.githubusercontent.com/58013489/70103397-0e615d00-1609-11ea-9301-829e9c5eeb8e.png)
 
 
+ The image below graphs the annual rainfall in orissa for the past 15 years. As we can see, the year with the highest annual rainfall was 2010 and the year with the lowest was ....... both of these extreme are bad for agriculture, the best year was.... because the rainfall was neither too high nor too low.
+ 
  
  
  
