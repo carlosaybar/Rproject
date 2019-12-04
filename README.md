@@ -11,8 +11,7 @@ This game was built using
 Rstudio
  
 Visualizing and explaining our results
-Below we have included a couple graphs with an explanation of what the graph means, the reasoning behind each one of these graphs lead to our CONCLUSION:
-
+**Below we have included a couple graphs with an explanation of what the graph means, the reasoning behind each one of these graphs lead to our CONCLUSION:**
 
 
 
@@ -24,6 +23,8 @@ This is a scatterplot of the annual rainfall in Orissa over the alst 100 years. 
  
  
 In the graph below we tested the accuraccy of our model by trying to predict the Rainfall in Kerala form 2010 - 2011 based on the annual rainfall from 2004 - 2009. As we can see, the ammount of rainfall has actually increased since 2009. However, there is not a significant correlation in the annual rainfall, so we decide to focus on the rainfall for each month.
+
+![predict](https://user-images.githubusercontent.com/58013489/70103397-0e615d00-1609-11ea-9301-829e9c5eeb8e.png)
 
 HERE INSERT THE NEXT IMAGE, THE ONE WITH THE FOUR RECTANGLE. 
  
