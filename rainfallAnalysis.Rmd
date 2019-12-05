@@ -1,0 +1,613 @@
+---
+authors: Carlos aybar , Biao Chen, Aarmando Mcghee
+date: 04/12/19
+title: "R Notebook"
+output: html_notebook
+---
+
+## Orissa
+
+```{r}
+install.packages("party")
+```
+
+```{r}
+library(tidyverse)
+library(party)
+```
+
+
+```{r}
+rainfall <- read.csv("rainfall.csv")
+head(rainfall)
+```
+
+
+```{r}
+orissa <- subset(rainfall , YEAR > 1915 & SUBDIVISION == "ORISSA")
+head(orissa)
+```
+
+
+### Hyphothesis TESTING
+# Exploratory analysis
+Scatter plot of adjusted earnings per year.
+```{r}
+ggplot(data = orissa, 
+       mapping = aes(x = YEAR, y = ANNUAL, color = YEAR)) +
+  geom_line(show.legend = TRUE) 
+```
+
+# comparing orissa's rainfall from jun-sep with the rainfall from march - may
+```{r}
+t.test(orissa$Jan.Feb, orissa$Mar.May, paired = FALSE)
+
+cat("p-value > alpha (0.05). The null hypothesis fails to be rejected.\n")
+cat("The adjusted earnings for Trilogies 2 and 3 are NOT significantly different.\n")
+```
+
+```{r}
+t.test(orissa$Jun.Sep, orissa$Oct.Dec, paired = FALSE)
+
+cat("p-value > alpha (0.05). The null hypothesis fails to be rejected.\n")
+cat("The rainfall during the months of jun-sep and oct-dec is not significantly differentt.\n")
+```
+
+
+## ANOVA
+# Checking to see if there is a significant difference between all the mothns
+ANOVA performs a significant difference test on means of 3 or more treatments.
+ANOVA determines if there is a significant difference among the treatments.
+The aov(<data>, <formula>) function performs the analysis.
+  The <data> must be a single data frame with each of the rows labels as treatments.
+  The <formula> parameter is the variable for the average ~ the treatment variable.
+  Example: aov(dataframe, formula = attribute ~ treatment)
+
+Is there a significant difference over the years in the annual rainfall in Orissa
+```{r}
+anovaTrilogy <- aov(data = orissa, ANNUAL ~ YEAR)
+summary(anovaTrilogy)
+```
+
+
+
+
+## LINEAR REGRESSION
+# Visualize the relationship between the data
+rainfall during january-february vs march to may
+```{r}
+ggplot(data = orissa, mapping = aes(x = Mar.May, y = Jun.Sep)) +
+  geom_point(mapping = aes(color = 2)) +
+  geom_smooth(method = "lm") +
+  labs(title = "Annual rainfal for in Orissa  year" ,
+         subtitle = "rainfall from 1915-2015" ,
+         x = "March to May")
+```
+
+### anlisisis comment : the more rainfall orissa gets during march and may, the more it will get 
+### during jun and sep
+
+finding the correlation in the annual rainfall over the years
+```{r}
+summerRain <- select(orissa, c("Mar.May", "Jun.Sep"))
+pairs(summerRain)
+```
+
+
+## here we calculate the correlation
+Calculate correlation value [-1, 1]
+```{r}
+rainfallCorrelation <- cor(orissa$Mar.May, orissa$Jun.Sep)
+```
+
+## Univariate Linear Regression
+Given 1 independent variable, predict the dependent variable.
+given the rainfall for march-may, we will predict the amount that orissa is expected to get
+for jun-sep
+```{r}
+model <- lm(Jun.Sep ~ Mar.May, data = orissa)
+model
+```
+
+
+## Prediction
+Given a goal difference of 16, predict the position.
+```{r}
+# Create a data frame with a single GD entry
+test <- data.frame(Mar.May = c(162))
+
+# Predict the position with the model and test data
+predictedPosition <- predict(model, test)
+cat("when orissa gets a rainfall of 162 from march to may, they will get", predictedPosition ," from june to september")
+```
+
+
+## CLASSIFICATION
+### reading the first 100 rows of the dataset orissa
+```{r}
+#Get the first 105 students
+reading <- orissa[c(1:500),]
+reading
+```
+
+
+## decision tree
+### We are creating a decision tree to predict the annual rainfall in orissa 
+```{r}
+
+tree <- ctree(ANNUAL ~ MAY + JUN, data = orissa)
+tree
+```
+```{r}
+plot(tree)
+```
+
+
+### We are using the modelcreated above and the new one in order to predict the annual rainfall
+### based on the two months with the highest rainfall in Orissa
+```{r}
+#predicting whether it is summer, fall, or spring, based on the rainfall
+testSeason <- data.frame(MAY = as.double(c(495.1)),
+                          JUN = as.double(c(368.7)))
+
+#making the prediction based on the model
+predictedSeason <-  predict(tree , newdata = testSeason)
+cat("based on the specific rainfall for may and june, the annual rainfall will be : " , predictedSeason)
+```
+
+
+# installing the knitr and rmarkdown packages
+```{r}
+install.packages("knitr")
+install.packages("rmarkdown")
+install.packages("forecast")
+```
+
+
+
+# calling the installed pacages
+```{r}
+library(knitr)
+library(rmarkdown)
+library(forecast)
+```
+
+
+## TIME SERIES
+### extracting the months and the years from the orissa data frame
+
+```{r}
+orissa2 <- orissa[, c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ,13, 14)]
+print(orissa2)
+```
+
+
+# printing the new data set
+```{r}
+data(orissa2)
+orissa2
+```
+
+
+
+# Plotting the new data set
+```{r}
+plot(orissa2)
+```
+
+### trainning the data
+```{r}
+# training set: 1949 to 1956
+train = window(orissa2, start = 1920, end = c(1960, 12))
+# test set:  1957 to 1960 
+test = window(airSeries, start = 1961, end = c(2000, 12))
+```
+
+
+## clustering and verification
+```{r}
+
+library(ggplot2)
+
+```
+
+```{r}
+head(orissa)
+```
+
+
+### we will be clustering the data into may, jun, and july because they are the months with most rain
+```{r}
+set.seed(20)
+summer <- data.frame(Year = orissa$YEAR , June = orissa$JUN , July = orissa$JUL, August = orissa$AUG)
+head(summer)
+
+```
+
+## K-Means: Perform Algorithm
+```{r}
+#perform kmeans with k set to 3
+orissaCluster <- kmeans(summer , 3 , nstart = 25)
+orissaCluster
+```
+
+## verification
+```{r}
+table(orissaCluster$cluster , orissa$YEAR)
+```
+
+## visualization
+```{r}
+#add the cluster assignment to each point
+orissa$YEAR <- as.factor(orissaCluster$cluster)
+
+
+
+#get centroids
+centroids <- as.data.frame(orissaCluster$centers)
+centroids$Cluster <- as.factor(c(1:3))
+
+
+#visualize cluster assignmetns
+ggplot(data = summer , aes(June, July , August, color = Year)) +
+  geom_point() +
+  geom_point(data = centroids , aes(x = June, y = July, fill = Cluster) , size = 5, shape =13)+
+  labs(titel = "Rainfall June" , x = " Rainfall July" , y = "Width (cm)")
+```
+
+
+
+### wthin sum of Squares (WSS)
+```{r}
+#for each k, perform WSS, store the value
+wss <- numeric(15)
+for(k in 1:15)
+  wss[k] = sum(kmeans(summer, k , nstart = 25) $withinss)
+```
+
+```{r}
+#Make a data frame out of the WSS result
+wssResults <- data.frame(k = c(1:15), wss = wss)
+wssResults
+```
+
+
+```{r}
+ggplot(data  = wssResults  , aes(x = k  , y = wss))+
+  geom_point( )+
+  geom_line() +
+  labs("k-means: iris" , x = "number of Clusters k" , y = "within sum of squares")
+ 
+```
+
+
+
+
+```{r}
+orissa1 <- subset(rainfall , YEAR > 2004 & SUBDIVISION == "ORISSA")
+month<-c(orissa1$JAN,orissa1$FEB,orissa1$MAR,orissa1$APR,orissa1$MAY,orissa1$JUN,orissa1$JUL,orissa1$AUG,orissa1$SEP,orissa1$OCT,orissa1$NOV,orissa1$DEC)
+
+monthts<-ts(month,frequency=12,start = c(2005))
+plot(monthts)
+```
+
+```{r}
+library(knitr)
+library(rmarkdown)
+library(forecast)
+```
+
+
+
+```{r}
+# training set: 1949 to 1956
+train = window(monthts, start = 2004, end = c(2010, 12))
+# test set:  1957 to 1960 
+test = window(monthts, start =2011, end = c(2015, 12))
+
+arimaModel <- auto.arima(train)
+arimaForecast <-forecast(arimaModel, h = 60)
+arimaForecast
+```
+
+```{r}
+plot(arimaForecast, main = "rain", ylab = "rainfall", xlab = "Months")
+lines(test, col="red")
+legend("topleft",lty = 1,bty = "n",col=c("red","blue"),c("Actual","Predicted"))
+```
+
+```{r}
+arimaMean <-arimaForecast$mean
+plot(test, main = "rain", ylab = "rainfall", xlab = "Months", col = "red")  
+lines(arimaMean, col="blue")
+legend("topleft",lty = 1,bty = "n",col=c("red","blue"),c("Actual","Predicted"))
+```
+
+
+
+
+
+
+```{r}
+install.packages("party")
+```
+
+```{r}
+library(tidyverse)
+library(party)
+```
+
+
+```{r}
+rainfall <- read.csv("rainfall.csv")
+View(rainfall)
+```
+
+
+## KERALA
+	
+	
+```{r}
+KERALA <- subset(rainfall , YEAR > 1915 & SUBDIVISION == "KERALA")
+head(KERALA)
+```
+
+
+```{r}
+ggplot(data = KERALA, 
+       mapping = aes(x = YEAR, y = ANNUAL, color = YEAR)) +
+  geom_line(show.legend = TRUE) 
+```
+
+```{r}
+t.test(KERALA$Jan.Feb, KERALA$Mar.May, paired = FALSE)
+
+cat("p-value > alpha (0.05). The null hypothesis fails to be rejected.\n")
+cat("The adjusted earnings for Trilogies 2 and 3 are NOT significantly different.\n")
+```
+
+
+
+
+
+
+## ANOVA
+### Checking to see if there is a significant difference between all the mothns
+
+ANOVA performs a significant difference test on means of 3 or more treatments.
+ANOVA determines if there is a significant difference among the treatments.
+The aov(<data>, <formula>) function performs the analysis.
+  The <data> must be a single data frame with each of the rows labels as treatments.
+  The <formula> parameter is the variable for the average ~ the treatment variable.
+  Example: aov(dataframe, formula = attribute ~ treatment)
+
+Is there a significant difference over the years in the annual rainfall in Orissa
+```{r}
+anovaTrilogy1 <- aov(data = KERALA, ANNUAL ~ YEAR)
+summary(anovaTrilogy1)
+```
+
+
+
+## LINEAR REGRESSION
+# Visualize the relationship between the data
+rainfall during january-february vs march to may
+```{r}
+ggplot(data = KERALA, mapping = aes(x = Mar.May, y = Jun.Sep)) +
+  geom_point(mapping = aes(color = 2)) +
+  geom_smooth(method = "lm") +
+  labs(title = "Annual rainfal for in Orissa  year" ,
+         subtitle = "rainfall from 1915-2015" ,
+         x = "March to May")
+```
+
+### anlisisis comment : the more rainfall orissa gets during march and may, the more it will get 
+### during jun and sep
+
+finding the correlation in the annual rainfall over the years
+```{r}
+summerRain1 <- select(KERALA, c("Mar.May", "Jun.Sep"))
+pairs(summerRain1)
+```
+
+
+### here we calculate the correlation
+Calculate correlation value [-1, 1]
+```{r}
+rainfallCorrelation3 <- cor(KERALA$Mar.May, KERALA$Jun.Sep)
+```
+
+### Univariate Linear Regression
+Given 1 independent variable, predict the dependent variable.
+given the rainfall for march-may, we will predict the amount that orissa is expected to get
+for jun-sep
+```{r}
+model3 <- lm(Jun.Sep ~ Mar.May, data =KERALA)
+model3
+```
+
+
+## Prediction
+Given a goal difference of 16, predict the position.
+```{r}
+# Create a data frame with a single GD entry
+test3 <- data.frame(Mar.May = c(162))
+
+# Predict the position with the model and test data
+predictedPosition <- predict(model3, test3)
+cat("when orissa gets a rainfall of 162 from march to may, they will get", predictedPosition ," from june to september")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## CLASSIFICATION
+### reading the first 100 rows of the dataset orissa
+```{r}
+#Get the first 105 students
+reading3 <- KERALA[c(1:500),]
+reading3
+```
+
+
+## decision tree
+### We are creating a decision tree to predict the annual rainfall in orissa 
+```{r}
+
+tree3 <- ctree(ANNUAL ~ MAY + JUN, data = KERALA)
+tree3
+```
+```{r}
+plot(tree3)
+```
+
+
+### We are using the modelcreated above and the new one in order to predict the annual rainfall
+### based on the two months with the highest rainfall in Orissa
+```{r}
+#predicting whether it is summer, fall, or spring, based on the rainfall
+testSeason3 <- data.frame(MAY = as.double(c(251.0)),
+                          JUN = as.double(c(454.4)))
+
+#making the prediction based on the model
+predictedSeason3 <-  predict(tree3 , newdata = testSeason3)
+cat("based on the specific rainfall for may and june, the annual rainfall will be : " , predictedSeason3)
+```
+
+
+
+# installing the knitr and rmarkdown packages
+```{r}
+install.packages("knitr")
+install.packages("rmarkdown")
+install.packages("forecast")
+```
+
+
+
+## clustering and verification
+```{r}
+
+library(ggplot2)
+
+```
+
+
+
+### we will be clustering the data into may, jun, and july because they are the months with most rain
+```{r}
+set.seed(20)
+summer3 <- data.frame(Year = KERALA$YEAR , June = KERALA$JUN , July = KERALA$JUL, August = KERALA$AUG)
+head(summer3)
+
+```
+
+## K-Means: Perform Algorithm
+```{r}
+#perform kmeans with k set to 3
+KERALACluster <- kmeans(summer3 , 3 , nstart = 25)
+KERALACluster
+```
+
+## verification
+```{r}
+table(KERALACluster$cluster , KERALA$YEAR)
+```
+
+## visualization
+```{r}
+#add the cluster assignment to each point
+KERALA$YEAR <- as.factor(KERALACluster$cluster)
+
+
+
+#get centroids
+centroids3 <- as.data.frame(KERALACluster$centers)
+centroids3$Cluster <- as.factor(c(1:3))
+
+
+#visualize cluster assignmetns
+ggplot(data = summer3 , aes(June, July , August, color = Year)) +
+  geom_point() +
+  geom_point(data = centroids3 , aes(x = June, y = July, fill = Cluster) , size = 5, shape =13)+
+  labs(titel = "Rainfall June" , x = " Rainfall July" , y = "Width (cm)")
+```
+
+
+
+## wthin sum of Squares (WSS)
+```{r}
+#for each k, perform WSS, store the value
+wss3 <- numeric(15)
+for(k in 1:15)
+  wss3[k] = sum(kmeans(summer3, k , nstart = 25) $withinss)
+```
+
+```{r}
+#Make a data frame out of the WSS result
+wssResults3 <- data.frame(k = c(1:15), wss = wss3)
+wssResults3
+```
+
+
+```{r}
+ggplot(data  = wssResults3  , aes(x = k  , y = wss3))+
+  geom_point( )+
+  geom_line() +
+  labs("k-means: iris" , x = "number of Clusters k" , y = "within sum of squares")
+ 
+```
+
+
+
+
+```{r}
+KERALA3 <- subset(rainfall , YEAR > 2004 & SUBDIVISION == "KERALA")
+month<-c(KERALA3$JAN,KERALA3$FEB,KERALA3$MAR,KERALA3$APR,KERALA3$MAY,KERALA3$JUN,KERALA3$JUL,KERALA3$AUG,KERALA3$SEP,KERALA3$OCT,KERALA3$NOV,KERALA3$DEC)
+
+monthts3<-ts(month,frequency=12,start = c(2005))
+plot(monthts3)
+```
+
+```{r}
+library(knitr)
+library(rmarkdown)
+library(forecast)
+```
+
+
+
+```{r}
+# training set: 1949 to 1956
+train3 = window(monthts3, start = 2004, end = c(2009, 12))
+# test set:  1957 to 1960 
+test3 = window(monthts3, start =2010, end = c(2011, 12))
+
+arimaModel3 <- auto.arima(train3)
+arimaForecast3 <-forecast(arimaModel3, h = 24)
+arimaForecast3
+```
+
+```{r}
+plot(arimaForecast3, main = "rain", ylab = "rainfall", xlab = "Months")
+lines(test3, col="red")
+legend("topleft",lty = 1,bty = "n",col=c("red","blue"),c("Actual","Predicted"))
+```
+
+```{r}
+arimaMean3 <-arimaForecast3$mean
+plot(test3, main = "rain", ylab = "rainfall", xlab = "Months", col = "red")  
+lines(arimaMean3, col="blue")
+legend("topleft",lty = 1,bty = "n",col=c("red","blue"),c("Actual","Predicted"))
+```
